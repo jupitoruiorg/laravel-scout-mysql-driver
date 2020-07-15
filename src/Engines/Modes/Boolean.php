@@ -29,7 +29,15 @@ class Boolean extends Mode
 
     public function buildParams(Builder $builder)
     {
-        $this->whereParams[] = $builder->query;
+        $params = $builder->query;
+
+        $words = explode(' ', $params);
+        $this->whereParams[] =
+            '(' . implode(' ', $words) . ') ' .
+            '(' . implode('* ', $words) . '*)'
+        ;
+
+        //$this->whereParams[] = $builder->query;
 
         return $this->whereParams;
     }
