@@ -18,15 +18,6 @@ class MySQLScoutServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                ManageIndexes::class,
-            ]);
-        }
-
-        $this->app->make(EngineManager::class)->extend('mysql', function () {
-            return new MySQLEngine(app(ModeContainer::class));
-        });
     }
 
     /**
@@ -48,6 +39,16 @@ class MySQLScoutServiceProvider extends ServiceProvider
             $fallbackMode = $engineNamespace.Str::studly(strtolower(config('scout.mysql.min_fulltext_search_fallback')));
 
             return new ModeContainer(new $mode(), new $fallbackMode());
+        });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ManageIndexes::class,
+            ]);
+        }
+
+        $this->app->make(EngineManager::class)->extend('mysql', function () {
+            return new MySQLEngine(app(ModeContainer::class));
         });
     }
 }
