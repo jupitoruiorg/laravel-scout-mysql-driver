@@ -71,7 +71,25 @@ class ModelService
     {
         $columns = $this->getAllFields();
 
-        return array_keys((new $this->model())->forceFill($columns)->toSearchableArray());
+        $searchable = (new $this->model())->forceFill($columns)->toSearchableArray();
+
+        return array_keys(array_except(
+            $searchable,
+            'relations'
+        ));
+    }
+
+    public function getSearchableRelations()
+    {
+        $columns = $this->getAllFields();
+
+        $searchable = (new $this->model())->forceFill($columns)->toSearchableArray();
+
+        return array_get(
+            $searchable,
+            'relations',
+            []
+        );
     }
 
     protected function getAllFields()

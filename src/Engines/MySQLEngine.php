@@ -62,6 +62,7 @@ class MySQLEngine extends Engine
         }
 
         $mode = $this->shouldUseFallback($builder) ? $this->fallbackMode : $this->mode;
+        $mode = $this->fallbackMode;
 
         $whereRawString = $mode->buildWhereRawString($builder);
         $params = $mode->buildParams($builder);
@@ -144,7 +145,7 @@ class MySQLEngine extends Engine
      * Flush all of the model's records from the engine.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $model
-     * 
+     *
      * @return void
      */
     public function flush($model)
@@ -164,8 +165,8 @@ class MySQLEngine extends Engine
     protected function shouldUseFallback($builder)
     {
         return ($this->mode->isFullText() &&
-        strlen($builder->query) < config('scout.mysql.min_fulltext_search_length')) ||
-        $this->fallbackSearchShouldBeUsedForModel($builder);
+                strlen($builder->query) < config('scout.mysql.min_fulltext_search_length')) ||
+            $this->fallbackSearchShouldBeUsedForModel($builder);
     }
 
     /**

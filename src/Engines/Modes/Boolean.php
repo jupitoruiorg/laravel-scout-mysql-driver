@@ -15,7 +15,20 @@ class Boolean extends Mode
 
         $indexFields = implode(',',  $this->modelService->setModel($builder->model)->getFullTextIndexFields());
 
+        $indexRelations = $this->modelService->setModel($builder->model)->getSearchableRelations();
+
+        $queryString .= "(";
+
         $queryString .= "MATCH($indexFields) AGAINST(? IN BOOLEAN MODE)";
+
+        if (filled($indexRelations)) {
+            foreach ($indexRelations as $indexRelation) {
+                $indexRelationFields = implode(',',  $indexRelation);
+                $queryString .= " OR MATCH($indexRelationFields) AGAINST(? IN BOOLEAN MODE)";
+            }
+        }
+
+        $queryString .= ")";
 
         return $queryString;
     }
@@ -32,10 +45,18 @@ class Boolean extends Mode
         $params = $builder->query;
 
         $words = explode(' ', $params);
-        $this->whereParams[] =
-            '(' . implode(' ', $words) . ') ' .
-            '(' . implode('* ', $words) . '*)'
-        ;
+
+        $whereParam = '(' . implode(' ', $words) . ') ' .
+            '(' . implode('* ', $words) . '*)';
+        $this->whereParams[] = $whereParam;
+
+        $indexRelations = $this->modelService->setModel($builder->model)->getSearchableRelations();
+
+        if (filled($indexRelations)) {
+            foreach ($indexRelations as $indexRelation) {
+                $this->whereParams[] = $whereParam;
+            }
+        }
 
         //$this->whereParams[] = $builder->query;
 
