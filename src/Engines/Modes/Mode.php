@@ -9,6 +9,9 @@ abstract class Mode
 {
     protected $whereParams = [];
 
+    /**
+     * @var ModelService
+     */
     protected $modelService;
 
     public function __construct()
@@ -39,7 +42,12 @@ abstract class Mode
                 $this->whereParams[$field] = $value;
                 $queryString .= "$field $operator ? AND ";
             } else {
-                $queryString .= "$field IS NULL AND ";
+                
+                if($operator === '!='){
+                    $queryString .= "$field IS NOT NULL AND ";
+                }else{
+                    $queryString .= "$field IS NULL AND ";
+                }
             }
         }
 
@@ -56,6 +64,17 @@ abstract class Mode
             $result [] = !empty($matches) ? array($matches[1], $matches[2], $value) : array($field, '=', $value);
         }
 
+        /**
+         * Add support for where() on json columns using '->' syntax
+         * data->a->b->c translates to json_unquote(json_extract(`data`, '$."a"."b"."c"'))
+         */
+        foreach ($result as $_k => $_v) {
+            if (($_v[0] ?? false) && stripos($_v[0],'->')!==false) {
+                list($root,$path) = explode('->',$_v[0],2);
+                $result[$_k][0] = "json_unquote(json_extract(`$root`, '$.\"".implode('"."',explode('->',$path))."\"'))";
+            }
+        }
+        
         return $result;
     }
 }
