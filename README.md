@@ -23,7 +23,7 @@ Install this package via **Composer**
 `composer require yab/laravel-scout-mysql-driver`
 
 
-Next add the ServiceProvider to the Package Service Providers in `config/app.php`
+Next if you are using laravel version 5.4, include the following ServiceProvider to the Providers array in `config/app.php`
 
 ```php
         /*
