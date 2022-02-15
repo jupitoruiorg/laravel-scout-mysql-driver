@@ -12,7 +12,7 @@ class Like extends Mode
     public function buildWhereRawString(Builder $builder)
     {
         $table = $builder->model->getTable();
-        
+
         $queryString = '';
 
         $this->fields = $this->modelService->setModel($builder->model)->getSearchableFields();
@@ -25,6 +25,16 @@ class Like extends Mode
             $queryString .= "`$table`.`$field` LIKE ? OR ";
         }
 
+        $indexRelations = $this->modelService->setModel($builder->model)->getSearchableRelations();
+
+        if (filled($indexRelations)) {
+            foreach ($indexRelations as $indexRelationFields) {
+                foreach ($indexRelationFields as $relationsField) {
+                    $queryString .= "$relationsField LIKE ? OR ";
+                }
+            }
+        }
+
         $queryString = trim($queryString, 'OR ');
         $queryString .= ')';
 
@@ -33,8 +43,20 @@ class Like extends Mode
 
     public function buildParams(Builder $builder)
     {
+        $params = '%'.$builder->query.'%';
+
         for ($itr = 0; $itr < count($this->fields); ++$itr) {
-            $this->whereParams[] = '%'.$builder->query.'%';
+            $this->whereParams[] = $params;
+        }
+
+        $indexRelations = $this->modelService->setModel($builder->model)->getSearchableRelations();
+
+        if (filled($indexRelations)) {
+            foreach ($indexRelations as $indexRelationFields) {
+                foreach ($indexRelationFields as $relationsField) {
+                    $this->whereParams[] = $params;
+                }
+            }
         }
 
         return $this->whereParams;
