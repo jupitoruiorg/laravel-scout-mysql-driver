@@ -78,7 +78,7 @@ class MySQLEngine extends Engine
             $query = call_user_func($builder->queryCallback, $query, $this);
         }
 
-        $result['count'] = $query->count();
+        $result['count'] = sql_count($query);
 
         if (property_exists($builder, 'orders') && !empty($builder->orders)) {
             foreach ($builder->orders as $order) {
